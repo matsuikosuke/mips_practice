@@ -38,7 +38,7 @@ initial
     $dumpfile("MIPStest.vcd");
     $dumpvars(0, dut);
 
-    $monitor("%h, %h, %h", dut.mips.instr, dut.datamem.a, dut.datamem.wd);
+    $monitor("%h, %h, %h", dut.mips.address, dut.idmem.a, dut.idmem.wd);
 
     reset <= 1;
     #22;
