@@ -29,6 +29,7 @@
 module datapath(
     input clk, reset,
     input memtoreg,
+    input pcen,
     input [1:0] pcsrc,
     input alusrca,
     input [1:0] alusrcb,
@@ -55,9 +56,9 @@ module datapath(
     wire [31:0] data;
     
     //PC
-    flopr #(32) pcreg(clk, reset, pcnext, pc);
+    flopenr #(32) pcreg(clk, reset, pcen, pcnext, pc);
     sl2 immsh(signimm, signimmsh);
-    mux3 #(32) pcbrmux(alu_result, aluout, {pc[31:28], instr[25:0], 2'b00}, pcsrc, pcnext);
+    mux3 #(32) pcmux(alu_result, aluout, {pc[31:28], instr[25:0], 2'b00}, pcsrc, pcnext);
     flopenr #(32) instr_reg(clk, reset, irwrite, readdata, instr);
     flopr #(32) data_reg(clk, reset, readdata, data);
         
