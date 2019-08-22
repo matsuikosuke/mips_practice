@@ -28,6 +28,7 @@
 
 module datapath(
     input clk, reset,
+    // Control Signal
     input memtoreg,
     input pcen,
     input [1:0] pcsrc,
@@ -39,8 +40,10 @@ module datapath(
     input irwrite,
     input lord,
     output zero,
-    output [31:0] pc,
-    output [31:0] address, writedata,
+    // to Instruction/Data memory
+    output [31:0] address,
+    output [31:0] writedata,
+    // from Instruction/Data memory
     input  [31:0] readdata
     );
     
@@ -49,11 +52,12 @@ module datapath(
     wire [31:0] pcnext, pcnextbr, pcplus4;
     wire [31:0] signimm;
     wire [31:0] signimmsh;
-    wire [31:0] rf_rd1, pre_srca, srca, srcb;
-    wire [31:0] result;
+    wire [31:0] rf_rd1, rf_rd2, pre_srca, srca, srcb;
+    wire [31:0] rf_wd3;
     wire [31:0] alu_result;
     wire [31:0] aluout;
     wire [31:0] data;
+    wire [31:0] wd3;
     
     //PC
     flopenr #(32) pcreg(clk, reset, pcen, pcnext, pc);
@@ -66,12 +70,13 @@ module datapath(
     regfile rf(clk, 
                regwrite, 
                instr[25:21], instr[20:16], 
-               writereg, data, 
-               rf_rd1, writedata 
+               writereg, rf_wd3, 
+               rf_rd1, rf_rd2 
                );               
     flopr #(32) a_reg(clk, reset, rf_rd1, pre_srca);    
+    flopr #(32) b_reg(clk, reset, rf_rd2, writedata);    
     mux2 #(5) wrmux(instr[20:16], instr[15:11], regdst, writereg);
-    mux2 #(32) remux(aluout, data, memtoreg, result);
+    mux2 #(32) remux(aluout, data, memtoreg, rf_wd3);
     signext se(instr[15:0], signimm);
     
     //ALU
