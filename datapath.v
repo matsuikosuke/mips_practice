@@ -37,7 +37,7 @@ module datapath(
     input regwrite,
     input [2:0] alucontrol,
     input irwrite,
-    input iord,
+    input lord,
     output zero,
     output [31:0] pc,
     output [31:0] address, writedata,
@@ -79,7 +79,7 @@ module datapath(
     mux4 #(32) srcbmux(writedata, 32'h4, signimm, signimmsh, alusrcb, srcb);
     alu alu(srca, srcb, alucontrol, alu_result, zero);
     flopr #(32) alu_reg(clk, reset, alu_result, aluout);    
-    mux2 #(32) alu_mux(pc, aluout, iord, address);
+    mux2 #(32) alu_mux(pc, aluout, lord, address);
     
     
 endmodule
