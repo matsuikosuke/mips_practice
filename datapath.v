@@ -19,9 +19,12 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `include "flopr.v"
+`include "flopenr.v"
 `include "add.v"
 `include "sl2.v"
 `include "mux2.v"
+`include "mux3.v"
+`include "mux4.v"
 `include "regfile.v"
 `include "signext.v"
 `include "alu.v"
@@ -47,9 +50,10 @@ module datapath(
     input  [31:0] readdata
     );
     
-    wire  [31:0] instr,
+    wire [31:0] pc;
+    wire [31:0] instr;
     wire [4:0] writereg;
-    wire [31:0] pcnext, pcnextbr, pcplus4;
+    wire [31:0] pcnext;
     wire [31:0] signimm;
     wire [31:0] signimmsh;
     wire [31:0] rf_rd1, rf_rd2, pre_srca, srca, srcb;

@@ -1,4 +1,6 @@
 module maindec(
+    input clk,
+    input reset,
     input [5:0] op,
     output memtoreg,
     output memwrite,
@@ -38,63 +40,79 @@ assign {memtoreg, regdst, lord, pcsrc, alusrca, alusrcb,
 always @ (posedge clk, posedge reset)
     if (reset) state <= S0;
     else state <= next_state;
-    
 
 always @ (*)
     case (state)
         S0:
             next_state = S1;
-            controls = 15'b00000001_10100_00;
         S1:
-            if(op = 6'b100011) //LW
+            if(op == 6'b100011) //LW
                 next_state = S2;
-            else(op = 6'b101011) //SW
+            else if(op == 6'b101011) //SW
                 next_state = S2;
-            else(op = 6'b000000) //Rtype
+            else if(op == 6'b000000) //Rtype
                 next_state = S6;
-            else(op = 6'b000100) //BEQ
+            else if(op == 6'b000100) //BEQ
                 next_state = S8;
-            else(op = 6'b001000) //ADDI
+            else if(op == 6'b001000) //ADDI
                 next_state = S9;
-            else(op = 6'b000010) //J
+            else if(op == 6'b000010) //J
                 next_state = S11;
             else
                 next_state = S1;
-            controls = 15'b00000011_00000_00;
         S2:
-            if(op = 6'b100011) //LW
+            if(op == 6'b100011) //LW
                 next_state = S3;
-            else(op = 6'b101011) //SW
+            else if(op == 6'b101011) //SW
                 next_state = S5;
             else
                 next_state = S2;
-            controls = 15'b00000110_00000_00;
         S3:
             next_state = S4;
-            controls = 15'b00100000_00000_00;
         S4:
             next_state = S0;
-            controls = 15'b10000000_00001_00;
         S5:
             next_state = S0;
-            controls = 15'b00100000_01000_00;
         S6:
             next_state = S7;
-            controls = 15'b00000100_00000_10;
         S7:
             next_state = S0;
-            controls = 15'b01000000_00001_00;
         S8:
             next_state = S0;
-            controls = 15'b00001100_00010_01;
         S9:
             next_state = S10;
-            controls = 15'b00000110_00000_00;
         S10:
             next_state = S0;
-            controls = 15'b00000000_00001_00;
         S11:
             next_state = S0;
+        default: next_state = 11'bxxxxxxxxxxx;
+    endcase
+
+always @ (*)
+    case (state)
+        S0:
+            controls = 15'b00000001_10100_00;
+        S1:
+            controls = 15'b00000011_00000_00;
+        S2:
+            controls = 15'b00000110_00000_00;
+        S3:
+            controls = 15'b00100000_00000_00;
+        S4:
+            controls = 15'b10000000_00001_00;
+        S5:
+            controls = 15'b00100000_01000_00;
+        S6:
+            controls = 15'b00000100_00000_10;
+        S7:
+            controls = 15'b01000000_00001_00;
+        S8:
+            controls = 15'b00001100_00010_01;
+        S9:
+            controls = 15'b00000110_00000_00;
+        S10:
+            controls = 15'b00000000_00001_00;
+        S11:
             controls = 15'b00010000_00100_00;
         default: controls = 15'bxxxxxxxx_xxxxx_xx;
     endcase

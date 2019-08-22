@@ -31,7 +31,7 @@ controller c(clk, reset,
              memwrite, 
              pcen,
              pcsrc,
-             alusrca, alusrcb, regdst, regwrite
+             alusrca, alusrcb, regdst, regwrite,
              alucontrol, irwrite, lord);
 
 datapath dp(clk, reset, memtoreg, pcen, pcsrc,
