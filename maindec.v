@@ -3,18 +3,40 @@ module maindec(
     output memtoreg,
     output memwrite,
     output branch,
-    output alusrc,
+    output pcwrite,
+    output [1:0] pcsrc, 
+    output alusrca,
+    output [1:0] alusrcb,
     output regdst, 
     output regwrite,
-    output jump,
+    output irwrite,
+    output lord,
     output [1:0] aluop
     );
 
-reg [8:0] controls;
+reg [15:0] controls;
+reg [10:0] state, next_state;
+
+parameter S0 =  11'b000_0000_0000;
+parameter S1 =  11'b000_0000_0001;
+parameter S2 =  11'b000_0000_0010;
+parameter S3 =  11'b000_0000_0100;
+parameter S4 =  11'b000_0000_1000;
+parameter S5 =  11'b000_0001_0000;
+parameter S6 =  11'b000_0010_0000;
+parameter S7 =  11'b000_0100_0000;
+parameter S8 =  11'b000_1000_0000;
+parameter S9 =  11'b001_0000_0000;
+parameter S10 = 11'b010_0000_0000;
+parameter S11 = 11'b100_0000_0000;
+
+always @ (posedge clk, posedge reset)
+    if (reset) state <= S0;
+    else state <= next_state;
 
 assign {regwrite, 
-        regdst, alusrc, branch, memwrite, 
-        memtoreg, jump, aluop} = controls;
+        regdst, alusrca, alusrcb, branch, pcwrite, pcsrc, memwrite, 
+        memtoreg, irwrite, lord, aluop} = controls;
 
 always @ (*)
     case(op)

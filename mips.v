@@ -12,27 +12,32 @@ module mips(
 
 wire memtoreg; 
 wire branch;
-wire alusrc;
+wire pcen;
+wire [1:0] pcsrc;
+wire alusrca;
+wire [1:0] alusrcb;
 wire regdst;
 wire regwrite;
-wire jump;
 wire [2:0] alucontrol;
+wire irwrite;
+wire lord;
 wire zero;
-wire pcsrc;
    
-controller c(instr[31:26],
+controller c(clk, reset, 
+             instr[31:26],
              instr[5:0],
              zero,
              memtoreg, 
              memwrite, 
+             pcen,
              pcsrc,
-             alusrc, regdst, regwrite, jump,
-             alucontrol);
+             alusrca, alusrcb, regdst, regwrite
+             alucontrol, irwrite, lord);
 
-datapath dp(clk, reset, memtoreg, pcsrc,
-            alusrc, regdst, regwrite, jump,
-            alucontrol, 
-            zero, pc, instr, 
+datapath dp(clk, reset, memtoreg, pcen, pcsrc,
+            alusrca, alusrcb, regdst, regwrite,
+            alucontrol, irwrite, lord,
+            zero, 
             address, writedata, readdata );
    
 endmodule
