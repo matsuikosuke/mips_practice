@@ -3,13 +3,13 @@
 
 module mips(
     input  clk, reset,
-    output [31:0] pc,
-    input [31:0] instr,
+    output [31:0] address,
     output memwrite,
-    output [31:0] address, writedata,
+    output [31:0] writedata,
     input [31:0] readdata
     );
 
+wire [31:0] instr;
 wire memtoreg; 
 wire branch;
 wire pcen;
@@ -37,7 +37,7 @@ controller c(clk, reset,
 datapath dp(clk, reset, memtoreg, pcen, pcsrc,
             alusrca, alusrcb, regdst, regwrite,
             alucontrol, irwrite, lord,
-            zero, 
+            zero, instr,
             address, writedata, readdata );
    
 endmodule

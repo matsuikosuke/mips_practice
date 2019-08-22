@@ -18,23 +18,20 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
 `include "mips.v"
-`include "imem.v"
-`include "datamem.v"
+`include "idmem.v"
 
 module top(
     input clk, reset,
     output [31:0] writedata,
-    output [31:0] dataadr,
+    output [31:0] address,
     output memwrite
     );
     
-wire [31:0] pc, instr, readdata;
+wire [31:0] readdata;
 
-mips mips (clk, reset, pc, instr, memwrite, dataadr, writedata, readdata);
+mips mips (clk, reset, address, memwrite,  writedata, readdata);
 
-imem imem (pc[7:2], instr);
-datamem datamem (clk, memwrite, dataadr, writedata, readdata);
+idmem idmem (clk, memwrite, address, writedata, readdata);
 
 endmodule

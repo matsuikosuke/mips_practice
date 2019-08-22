@@ -43,6 +43,7 @@ module datapath(
     input irwrite,
     input lord,
     output zero,
+    output [31:0] instr,
     // to Instruction/Data memory
     output [31:0] address,
     output [31:0] writedata,
@@ -51,7 +52,6 @@ module datapath(
     );
     
     wire [31:0] pc;
-    wire [31:0] instr;
     wire [4:0] writereg;
     wire [31:0] pcnext;
     wire [31:0] signimm;
