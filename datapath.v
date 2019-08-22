@@ -29,48 +29,56 @@
 module datapath(
     input clk, reset,
     input memtoreg,
-    input pcsrc,
-    input alusrc,
+    input [1:0] pcsrc,
+    input alusrca,
+    input [1:0] alusrcb,
     input regdst,
     input regwrite,
-    input jump,
     input [2:0] alucontrol,
+    input irwrite,
+    input iord,
     output zero,
     output [31:0] pc,
-    input  [31:0] instr,
-    output [31:0] aluout, writedata,
+    output [31:0] address, writedata,
     input  [31:0] readdata
     );
     
+    wire  [31:0] instr,
     wire [4:0] writereg;
-    wire [31:0] pcnext, pcnextbr, pcplus4, pcbranch;
+    wire [31:0] pcnext, pcnextbr, pcplus4;
     wire [31:0] signimm;
     wire [31:0] signimmsh;
-    wire [31:0] srca, srcb;
+    wire [31:0] rf_rd1, pre_srca, srca, srcb;
     wire [31:0] result;
+    wire [31:0] alu_result;
+    wire [31:0] aluout;
+    wire [31:0] data;
     
     //PC
     flopr #(32) pcreg(clk, reset, pcnext, pc);
-    adder pcadd1(pc, 32'b100, pcplus4);
     sl2 immsh(signimm, signimmsh);
-    adder pcadd2(pcplus4, signimmsh, pcbranch);
-    mux2 #(32) pcbrmux(pcplus4, pcbranch, pcsrc, pcnextbr);
-    mux2 #(32) pcmux(pcnextbr, {pcplus4[31:28], instr[25:0], 2'b00}, jump, pcnext);
+    mux3 #(32) pcbrmux(alu_result, aluout, {pc[31:28], instr[25:0], 2'b00}, pcsrc, pcnext);
+    flopenr #(32) instr_reg(clk, reset, irwrite, readdata, instr);
+    flopr #(32) data_reg(clk, reset, readdata, data);
         
     //Register
     regfile rf(clk, 
                regwrite, 
                instr[25:21], instr[20:16], 
-               writereg, result, 
-               srca, writedata 
-               );
+               writereg, data, 
+               rf_rd1, writedata 
+               );               
+    flopr #(32) a_reg(clk, reset, rf_rd1, pre_srca);    
     mux2 #(5) wrmux(instr[20:16], instr[15:11], regdst, writereg);
-    mux2 #(32) remux(aluout, readdata, memtoreg, result);
+    mux2 #(32) remux(aluout, data, memtoreg, result);
     signext se(instr[15:0], signimm);
     
     //ALU
-    mux2 #(32) srcbmux(writedata, signimm, alusrc, srcb);
-    alu alu(srca, srcb, alucontrol, aluout, zero);
+    mux2 #(32) srcamux(pc, pre_srca, alusrca, srca);
+    mux4 #(32) srcbmux(writedata, 32'h4, signimm, signimmsh, alusrcb, srcb);
+    alu alu(srca, srcb, alucontrol, alu_result, zero);
+    flopr #(32) alu_reg(clk, reset, alu_result, aluout);    
+    mux2 #(32) alu_mux(pc, aluout, iord, address);
     
     
 endmodule

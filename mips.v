@@ -6,7 +6,7 @@ module mips(
     output [31:0] pc,
     input [31:0] instr,
     output memwrite,
-    output [31:0] aluout, writedata,
+    output [31:0] address, writedata,
     input [31:0] readdata
     );
 
@@ -33,6 +33,6 @@ datapath dp(clk, reset, memtoreg, pcsrc,
             alusrc, regdst, regwrite, jump,
             alucontrol, 
             zero, pc, instr, 
-            aluout, writedata, readdata );
+            address, writedata, readdata );
    
 endmodule
