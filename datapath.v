@@ -49,28 +49,28 @@ module datapath(
     wire [31:0] srca, srcb;
     wire [31:0] result;
     
-    //PC
+    // IF stage
     flopr #(32) pcreg(clk, reset, pcnext, pc);
     adder pcadd1(pc, 32'b100, pcplus4);
-    sl2 immsh(signimm, signimmsh);
-    adder pcadd2(pcplus4, signimmsh, pcbranch);
     mux2 #(32) pcbrmux(pcplus4, pcbranch, pcsrc, pcnextbr);
     mux2 #(32) pcmux(pcnextbr, {pcplus4[31:28], instr[25:0], 2'b00}, jump, pcnext);
-        
-    //Register
+    
+    // ID stage
     regfile rf(clk, 
                regwrite, 
                instr[25:21], instr[20:16], 
-               writereg, result, 
+               writereg, result,
                srca, writedata 
                );
-    mux2 #(5) wrmux(instr[20:16], instr[15:11], regdst, writereg);
-    mux2 #(32) remux(aluout, readdata, memtoreg, result);
     signext se(instr[15:0], signimm);
-    
-    //ALU
-    mux2 #(32) srcbmux(writedata, signimm, alusrc, srcb);
+               
+    // EX stage
+    sl2 immsh(signimm, signimmsh);
+    adder pcadd2(pcplus4, signimmsh, pcbranch);
     alu alu(srca, srcb, alucontrol, aluout, zero);
+    mux2 #(32) srcbmux(writedata, signimm, alusrc, srcb);
+    mux2 #(5) wrmux(instr[20:16], instr[15:11], regdst, writereg);
     
-    
+    // WB stage
+    mux2 #(32) remux(aluout, readdata, memtoreg, result);    
 endmodule
