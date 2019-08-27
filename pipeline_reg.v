@@ -29,8 +29,8 @@ module id_ex_reg(
     output reg [31:0] out_srca,
     input [31:0] in_writedata,
     output reg [31:0] out_writedata,
-    input [4:0] in_rie, in_rde,
-    output reg [4:0] out_rie, out_rde,
+    input [4:0] in_rse, in_rte, in_rde,
+    output reg [4:0] out_rse, out_rte, out_rde,
     input [31:0]in_signimm,
     output reg [31:0] out_signimm,
     // Control Lines WB
@@ -57,7 +57,8 @@ begin
     out_pcplus4 = 32'b0;
     out_srca = 32'b0;
     out_writedata = 32'b0;
-    out_rie = 5'b0; 
+    out_rse = 5'b0; 
+    out_rte = 5'b0; 
     out_rde = 5'b0;
     out_signimm = 32'b0;
     out_memtoreg = 1'b0;
@@ -74,7 +75,8 @@ begin
     out_pcplus4 <= in_pcplus4;
     out_srca <= in_srca;
     out_writedata <= in_writedata;
-    out_rie <= in_rie;
+    out_rse <= in_rse;
+    out_rte <= in_rte;
     out_rde <= in_rde;
     out_signimm <= in_signimm;
     // Control Lines WB

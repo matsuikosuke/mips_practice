@@ -22,10 +22,12 @@
 `include "add.v"
 `include "sl2.v"
 `include "mux2.v"
+`include "mux3.v"
 `include "regfile.v"
 `include "signext.v"
 `include "alu.v"
 `include "pipeline_reg.v"
+`include "hazard_unit.v"
 
 module datapath(
     input clk, reset,
@@ -53,9 +55,9 @@ module datapath(
     wire [31:0] signimm_id, signimm_ex;
     wire [31:0] signimmsh;
     wire [31:0] aluout_ex, aluout_mem, aluout_wb;
-    wire [31:0] srca_id, srca_ex, srcb;
+    wire [31:0] srca_id, pre_srca_ex, srca_ex, pre_srcb, srcb;
     wire [31:0] writedata_id, writedata_ex, writedata_mem;
-    wire [4:0] rie_id, rde_id, rie_ex, rde_ex;
+    wire [4:0] rse_id, rte_id, rde_id, rse_ex, rte_ex, rde_ex;
     wire [31:0] instr_id;
     wire zero_ex, zero_mem;
     wire [4:0] writereg_ex, writereg_mem, writereg_wb;
@@ -66,6 +68,13 @@ module datapath(
     wire regdst_id, regdst_ex;
     wire alusrc_id, alusrc_ex;
     wire memwrite_id, memwrite_ex, memwrite_mem;
+    wire [1:0] forward_a, forward_b;
+    
+    // Hazard Unit
+    hazard_unit hazard_check(
+        regwrite_wb, regwrite_mem, writereg_mem, writereg_wb, 
+        rse_ex, rte_ex, forward_a, forward_b
+    );
     
     // IF stage
     flopr #(32) pcreg(clk, reset, pcnext, pc);
@@ -81,13 +90,14 @@ module datapath(
                srca_id, writedata_id 
                );
     signext se(instr_id[15:0], signimm_id);
-    assign rie_id = instr_id[20:16];
+    assign rse_id = instr_id[25:21];
+    assign rte_id = instr_id[20:16];
     assign rde_id = instr_id[15:11];
     id_ex_reg id_ex_pipeline(clk, 
             pcplus4_id, pcplus4_ex, 
-            srca_id, srca_ex, 
+            srca_id, pre_srca_ex, 
             writedata_id, writedata_ex, 
-            rie_id, rde_id, rie_ex, rde_ex, 
+            rse_id, rte_id, rde_id, rse_ex, rte_ex, rde_ex, 
             signimm_id, signimm_ex,
             // Control Lines WB
             memtoreg_id,
@@ -112,8 +122,10 @@ module datapath(
     sl2 immsh(signimm_ex, signimmsh);
     adder pcadd2(pcplus4_ex, signimmsh, pcbranch_ex);
     alu alu(srca_ex, srcb, alucontrol_ex, aluout_ex, zero_ex);
-    mux2 #(32) srcbmux(writedata_ex, signimm_ex, alusrc_ex, srcb);
-    mux2 #(5) wrmux(rie_ex, rde_ex, regdst_ex, writereg_ex);
+    mux2 #(32) srcbmux(writedata_ex, signimm_ex, alusrc_ex, pre_srcb);
+    mux2 #(5) wrmux(rte_ex, rde_ex, regdst_ex, writereg_ex);    
+    mux3 #(32) mux_forward_a(pre_srca_ex, result, aluout_mem, forward_a, srca_ex);
+    mux3 #(32) mux_forward_b(pre_srcb, result, aluout_mem, forward_b, srcb);
     ex_mem_reg ex_mem_pipeline(clk, 
             zero_ex, zero_mem,
             aluout_ex, aluout_mem,
