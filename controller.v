@@ -13,16 +13,15 @@ module controller(
     output memwrite,
     // Control Lines EX
     output [2:0] alucontrol,
-    output alusrc,    
-    output regdst     
-    //output jump,
+    output alusrc,
+    output regdst
     );
     
 wire [1:0] aluop;
 wire branch;
 
 maindec md (op, memtoreg, memwrite, branch,
-            alusrc, regdst, regwrite, jump,
+            alusrc, regdst, regwrite,
             aluop);
             
 aludec ad (funct, aluop, alucontrol);
