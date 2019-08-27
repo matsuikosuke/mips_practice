@@ -29,7 +29,7 @@ reg [31:0] RAM[63:0];
 
 initial
   begin
-    $readmemh("memfile.mem", RAM);
+    $readmemh("memfile_pipeline1.mem", RAM);
   end
     
   assign rd = RAM[a];
