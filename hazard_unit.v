@@ -11,7 +11,7 @@ module hazard_unit(
 assign forward_a = func_forward_a(regwrite_wb, regwrite_mem, writereg_mem, writereg_wb, rse_ex);
 assign forward_b = func_forward_b(regwrite_wb, regwrite_mem, writereg_mem, writereg_wb, rte_ex);
 
-function func_forward_a;
+function [1:0] func_forward_a;
     input regwrite_wb;
     input regwrite_mem;
     input [4:0] writereg_mem;
@@ -27,7 +27,7 @@ function func_forward_a;
     end 
 endfunction
 
-function func_forward_b;
+function [1:0] func_forward_b;
     input regwrite_wb;
     input regwrite_mem;
     input [4:0] writereg_mem;
