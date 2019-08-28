@@ -56,7 +56,7 @@ initial
 always @ (negedge clk)
   begin
     if (memwrite) begin
-      if(dataadr === 84 & writedata === 7) begin
+      if(dataadr === 84 & writedata === 5) begin
         $display("simulation succeeded");
         $finish;
       //end else begin

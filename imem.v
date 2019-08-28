@@ -29,7 +29,7 @@ reg [31:0] RAM[63:0];
 
 initial
   begin
-    $readmemh("memfile_forwarding2.mem", RAM);
+    $readmemh("memfile_stall1.mem", RAM);
   end
     
   assign rd = RAM[a];
