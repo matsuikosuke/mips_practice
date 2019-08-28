@@ -1,6 +1,7 @@
 module if_id_reg(
     input  clk,
     input  reset,
+    input  stall_id, 
     input [31:0] in_pcplus4,
     input [31:0] in_inst,
     output reg [31:0] out_pcplus4,
@@ -13,7 +14,7 @@ always @ (posedge clk, posedge reset)
             out_pcplus4 <= 0;
             out_inst <= 0;
         end
-    else
+    else if(stall_id)
         begin
             out_pcplus4 <= in_pcplus4;
             out_inst <= in_inst;
@@ -23,6 +24,7 @@ endmodule
 
 module id_ex_reg(
     input  clk,
+    input  flash_ex,
     input [31:0]  in_pcplus4,
     output reg [31:0]out_pcplus4,
     input [31:0] in_srca,
@@ -71,25 +73,43 @@ begin
 end
 
 always @ (posedge clk)
-begin
-    out_pcplus4 <= in_pcplus4;
-    out_srca <= in_srca;
-    out_writedata <= in_writedata;
-    out_rse <= in_rse;
-    out_rte <= in_rte;
-    out_rde <= in_rde;
-    out_signimm <= in_signimm;
-    // Control Lines WB
-    out_memtoreg <= in_memtoreg;
-    out_regwrite <= in_regwrite;
-    // Control Lines MEM
-    out_branch <= in_branch;
-    out_memwrite <= in_memwrite;
-    // Control Lines EX
-    out_alucontrol <= in_alucontrol;
-    out_alusrc <= in_alusrc;
-    out_regdst <= in_regdst;
-end
+if(flash_ex)
+    begin
+        out_pcplus4 <= 32'b0;
+        out_srca <= 32'b0;
+        out_writedata <= 32'b0;
+        out_rse <= 5'b0;
+        out_rte <= 5'b0;
+        out_rde <= 5'b0;
+        out_signimm <= 32'b0;
+        out_memtoreg <= 1'b0;
+        out_regwrite <= 1'b0;
+        out_branch <= 1'b0;
+        out_memwrite <= 1'b0;
+        out_alucontrol <= 3'b0;
+        out_alusrc <= 1'b1;
+        out_regdst <= 1'b0;
+    end
+else
+    begin
+        out_pcplus4 <= in_pcplus4;
+        out_srca <= in_srca;
+        out_writedata <= in_writedata;
+        out_rse <= in_rse;
+        out_rte <= in_rte;
+        out_rde <= in_rde;
+        out_signimm <= in_signimm;
+        // Control Lines WB
+        out_memtoreg <= in_memtoreg;
+        out_regwrite <= in_regwrite;
+        // Control Lines MEM
+        out_branch <= in_branch;
+        out_memwrite <= in_memwrite;
+        // Control Lines EX
+        out_alucontrol <= in_alucontrol;
+        out_alusrc <= in_alusrc;
+        out_regdst <= in_regdst;
+    end
 endmodule
 
 

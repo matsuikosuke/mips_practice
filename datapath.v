@@ -19,6 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `include "flopr.v"
+`include "flopenr.v"
 `include "add.v"
 `include "sl2.v"
 `include "mux2.v"
@@ -69,18 +70,20 @@ module datapath(
     wire alusrc_id, alusrc_ex;
     wire memwrite_id, memwrite_ex, memwrite_mem;
     wire [1:0] forward_a, forward_b;
+    wire stall_if, stall_id, flash_ex;
     
     // Hazard Unit
     hazard_unit hazard_check(
-        regwrite_wb, regwrite_mem, writereg_mem, writereg_wb, 
-        rse_ex, rte_ex, forward_a, forward_b
+        regwrite_wb, regwrite_mem, memtoreg_ex, writereg_mem, writereg_wb, 
+        rse_id, rte_id, rse_ex, rte_ex, forward_a, forward_b,
+        stall_if, stall_id, flash_ex
     );
     
     // IF stage
-    flopr #(32) pcreg(clk, reset, pcnext, pc);
+    flopenr #(32) pcreg(clk, reset, stall_if, pcnext, pc);
     adder pcadd1(pc, 32'b100, pcplus4_if);
     mux2 #(32) pcbrmux(pcplus4_if, pcbranch_mem, pcsrc, pcnext);
-    if_id_reg if_id_pipeline(clk, reset, pcplus4_if, instr, pcplus4_id, instr_id);
+    if_id_reg if_id_pipeline(clk, reset, stall_id, pcplus4_if, instr, pcplus4_id, instr_id);
     
     // ID stage
     regfile rf(clk,
@@ -93,9 +96,9 @@ module datapath(
     assign rse_id = instr_id[25:21];
     assign rte_id = instr_id[20:16];
     assign rde_id = instr_id[15:11];
-    id_ex_reg id_ex_pipeline(clk, 
+    id_ex_reg id_ex_pipeline(clk, flash_ex, 
             pcplus4_id, pcplus4_ex, 
-            srca_id, pre_srca_ex, 
+            srca_id, pre_srca_ex,
             writedata_id, writedata_ex, 
             rse_id, rte_id, rde_id, rse_ex, rte_ex, rde_ex, 
             signimm_id, signimm_ex,
