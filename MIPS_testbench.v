@@ -53,16 +53,16 @@ initial
      #5;
    end
    
-//always @ (negedge clk)
-  //begin
-    //if (memwrite) begin
-      //if(dataadr === 84 & writedata === 7) begin
-      //  $display("simulation succeeded");
-      //  $finish;
-      //end else if (dataadr !== 80) begin
-      //  $display("simulation failed");
-      //  $finish;
-      //end
-    //end
-  //end
+always @ (negedge clk)
+  begin
+    if (memwrite) begin
+      if(dataadr === 84 & writedata === 7) begin
+        $display("simulation succeeded");
+        $finish;
+      //end else begin
+        //$display("simulation failed");
+        //$finish;
+      end
+    end
+  end
 endmodule
